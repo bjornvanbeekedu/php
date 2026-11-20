@@ -1,7 +1,11 @@
 <?php
-  // router laden
-  // loadPage() zet de pagina in <main>
+  session_start();
+
   require_once __DIR__ . '/../app/core/trigger.php';
+
+  
+
+  $content = loadPage();
 ?>
 
 <!DOCTYPE html>
@@ -15,9 +19,13 @@
       <a href="?controller=page1">Page 1</a>
       <a href="?controller=page2">Page 2</a>
       <a href="?controller=fruits">Fruits Database</a>
+      <?php if (empty($_SESSION["account"])): ?>
+        <a href="?controller=login">Sign in</a>
+      <?php else: ?>
+        <a href="?controller=logout">Sign out</a>
+      <?php endif; ?>
     </header>
     
-
-    <main><?= loadPage(); ?></main>
+    <main><?= $content ?></main>
   </body>
 </html>

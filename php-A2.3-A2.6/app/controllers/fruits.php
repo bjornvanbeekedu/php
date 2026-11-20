@@ -1,54 +1,42 @@
 <?php
-  // lijst met al het fruit
-  function fruits() {
-    // database verbinding
-    require_once __DIR__ . "/../core/database.php";
-    $conn = connDb();
+function fruits()
+{
+  require_once __DIR__ . "/../core/database.php";
+  $conn = connDb(); // Initialize database
 
-    // fruit ophalen op naam
-    $result = performQuery($conn, "SELECT id, name, color, sweetness FROM fruits ORDER BY name ASC");
-    $table = "";
+  $result = performQuery($conn, "SELECT id, name, color, sweetness, COUNT(*) OVER() AS totaal FROM fruits ORDER BY name ASC");
+  $length = 0;
+  $table = "";
 
-    // fruit gevonden?
-    if ($result->num_rows > 0) {
-      // rij per fruit
-      while ($row = $result->fetch_assoc()) {
-        $id = $row["id"];
-        $name = $row["name"];
-        $color = $row["color"];
-        $sweetness = $row["sweetness"];
-
-        $table = $table . "<tr><td>$id</td><td>$name</td><td>$color</td><td>$sweetness</td>";
-        $table = $table . "<td><a href='?controller=fruitshow&id=$id'>👁</a></td></tr>";
-      }
-
-      // aantal onderaan
-      $aantal = $result->num_rows;
-      $table = $table . "<tr><td colspan='5'>Aantal fruitsoorten: $aantal</td></tr>";
-    } else {
-      // geen fruit
-      $table = "<tr><td colspan='5'>Geen fruit gevonden</td></tr>";
+  if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+      $length = (int) $row['totaal'];
+      $table .= "<tr><td>{$row['id']}</td><td>{$row['name']}</td><td>{$row['color']}</td><td>{$row['sweetness']}</td><td><a href='?controller=fruitshow&id={$row['id']}'>👁</a></td><td><a href='?controller=fruitupdate&id={$row['id']}'>&#9998;</a></td><td><a href='?controller=fruitremove&id={$row['id']}'>&#x1F5D1;</a></td></tr>";
     }
-
-    // pagina maken
-    $output = "
-      <h2>Fruits Database</h2>
-      <a href='?controller=fruitadd'>+ Fruit toevoegen</a><br><br>
-      <table>
-        <tr>
-          <th>ID</th>
-          <th>name</th>
-          <th>color</th>
-          <th>sweetness</th>
-          <th>bekijken</th>
-        </tr>
-        $table
-      </table>
-    ";
-
-    // verbinding sluiten
-    $conn->close();
-
-    return $output;
+    $table .= "<tr><td colspan='5'>Aantal fruitsoorten: $length</td></tr>";
+  } else {
+    $table = "<tr><td colspan='5'>Geen fruit gevonden</td></tr>";
   }
+
+  $output = "
+    <h2>Fruits Database</h2>
+    <a href='?controller=fruitadd'>+ Fruit toevoegen</a><br><br>
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>name</th>
+        <th>color</th>
+        <th>sweetness</th>
+        <th>bekijken</th>
+        <th>wijzigen</th>
+        <th>verwijderen</th>
+      </tr>
+      {$table}
+    </table>
+  ";
+
+  $conn->close();
+
+  return $output;
+}
 ?>
